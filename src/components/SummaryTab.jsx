@@ -141,9 +141,16 @@ export default function SummaryTab() {
           Recommended pairings for PolicyEngine's needs: technical issue tracking (4,672+ GitHub issues) + non-technical work (grants, papers, fundraising)
         </Text>
         <Alert color="teal" variant="light" icon={<IconAlertCircle />}>
-          <Text size="sm" fw={600}>Key Finding:</Text>
-          <Text size="sm">
-            CiviCRM has built-in grant tracking → Focus on choosing engineering tool only
+          <Text size="sm" fw={700} mb={4}>🔑 Critical Requirements Revealed</Text>
+          <Text size="sm" mb={8}>
+            PolicyEngine needs: <strong>User database sync + Email campaigns (Mailchimp replacement) + Grant tracking</strong>
+          </Text>
+          <SimpleGrid cols={2} spacing="xs">
+            <Text size="xs">✅ CiviCRM does all this: $0-600/year net (with Mailchimp savings)</Text>
+            <Text size="xs">❌ Custom would cost: $50,000-90,000 to build</Text>
+          </SimpleGrid>
+          <Text size="sm" mt={8} fw={600}>
+            → Focus on choosing engineering tool only. See Implementation tab for details.
           </Text>
         </Alert>
       </div>

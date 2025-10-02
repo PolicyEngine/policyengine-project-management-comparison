@@ -74,13 +74,27 @@ export default function CRMTab() {
       </div>
 
       <Alert color="green" variant="light" icon={<IconAlertCircle />}>
-        <Text size="sm" fw={600} mb={4}>Recommendation: CiviCRM</Text>
-        <Text size="sm">
-          <strong>CiviCRM is purpose-built for nonprofits with grant tracking out-of-the-box.</strong> It's open source,
-          has a good API for Claude Code integration, and can be self-hosted ($0) or managed hosted ($50-100/mo).
+        <Text size="sm" fw={700} mb={4}>🎯 CLEAR WINNER: CiviCRM</Text>
+        <Text size="sm" mb={8}>
+          <strong>PolicyEngine needs more than grant tracking:</strong> User database sync + Email campaigns (Mailchimp replacement) +
+          Contact management + Grant tracking. CiviCRM does ALL of this out-of-box.
         </Text>
-        <Text size="sm" mt={8}>
-          Alternatives like HubSpot are more modern but expensive and not specialized for grants.
+        <SimpleGrid cols={3} spacing="sm" mb={8}>
+          <div>
+            <Text size="xs" fw={600}>User Sync</Text>
+            <Text size="xs" c="green">✅ REST API + webhooks</Text>
+          </div>
+          <div>
+            <Text size="xs" fw={600}>Email Campaigns</Text>
+            <Text size="xs" c="green">✅ CiviMail (replaces Mailchimp)</Text>
+          </div>
+          <div>
+            <Text size="xs" fw={600}>Savings</Text>
+            <Text size="xs" c="green">✅ $420-1,200/year (cancel Mailchimp)</Text>
+          </div>
+        </SimpleGrid>
+        <Text size="sm" fw={600}>
+          Custom CRM would cost $50,000-90,000 to build all these features. CiviCRM: $0-600/year net cost.
         </Text>
       </Alert>
 

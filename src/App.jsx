@@ -1,12 +1,13 @@
 import '@mantine/core/styles.css';
 import { useState } from 'react';
 import { MantineProvider, Container, Tabs } from '@mantine/core';
-import { IconLayoutDashboard, IconCode, IconServer, IconDatabase } from '@tabler/icons-react';
+import { IconLayoutDashboard, IconCode, IconServer, IconDatabase, IconRocket } from '@tabler/icons-react';
 import Header from './components/Header';
 import SummaryTab from './components/SummaryTab';
 import ToolsOnlyTab from './components/ToolsOnlyTab';
 import CRMTab from './components/CRMTab';
 import APITab from './components/APITab';
+import ImplementationTab from './components/ImplementationTab';
 
 const theme = {
   colors: {
@@ -47,6 +48,9 @@ function App() {
             <Tabs.Tab value="api" leftSection={<IconServer size={16} />}>
               API Comparison
             </Tabs.Tab>
+            <Tabs.Tab value="implementation" leftSection={<IconRocket size={16} />}>
+              Implementation
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="summary">
@@ -63,6 +67,10 @@ function App() {
 
           <Tabs.Panel value="api">
             <APITab />
+          </Tabs.Panel>
+
+          <Tabs.Panel value="implementation">
+            <ImplementationTab />
           </Tabs.Panel>
         </Tabs>
       </Container>
