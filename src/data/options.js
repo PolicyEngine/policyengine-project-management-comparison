@@ -15,7 +15,7 @@ export const options = [
       }
     },
     openSource: 'both',
-    engineering: 4,
+    engineeringRating: 4,
     nonTech: 5,
     apiQuality: 5,
     devOps: 'high',
@@ -56,7 +56,7 @@ export const options = [
       note: 'Jira free if OSS license approved'
     },
     openSource: 'both',
-    engineering: 2,
+    engineeringRating: 2,
     nonTech: 5,
     apiQuality: 4,
     devOps: 'low',
@@ -95,7 +95,7 @@ export const options = [
       }
     },
     openSource: 'civicrm-only',
-    engineering: 5,
+    engineeringRating: 5,
     nonTech: 5,
     apiQuality: 5,
     devOps: 'low',
@@ -132,7 +132,7 @@ export const options = [
       }
     },
     openSource: 'civicrm-only',
-    engineering: 3,
+    engineeringRating: 3,
     nonTech: 5,
     apiQuality: 2,
     devOps: 'none',

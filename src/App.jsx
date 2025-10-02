@@ -45,7 +45,7 @@ function OptionCard({ option }) {
         </Group>
 
         <Group gap="xs">
-          <Badge color="teal" variant="dot">Engineering: {'⭐'.repeat(option.engineering)}</Badge>
+          <Badge color="teal" variant="dot">Engineering: {'⭐'.repeat(option.engineeringRating)}</Badge>
           <Badge color="blue" variant="dot">API: {'⭐'.repeat(option.apiQuality)}</Badge>
           <Badge color={option.openSource === 'both' ? 'green' : 'gray'} variant="dot">
             {option.openSource === 'both' ? 'Fully OSS' : 'Partial OSS'}
