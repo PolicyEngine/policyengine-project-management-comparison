@@ -6,6 +6,7 @@ import Header from './components/Header';
 import SummaryTab from './components/SummaryTab';
 import ToolsOnlyTab from './components/ToolsOnlyTab';
 import CRMTab from './components/CRMTab';
+import APITab from './components/APITab';
 
 const theme = {
   colors: {
@@ -61,7 +62,7 @@ function App() {
           </Tabs.Panel>
 
           <Tabs.Panel value="api">
-            <div>Coming soon: Detailed API examples and code comparisons</div>
+            <APITab />
           </Tabs.Panel>
         </Tabs>
       </Container>
