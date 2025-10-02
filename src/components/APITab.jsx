@@ -177,40 +177,93 @@ export default function APITab() {
       </Card>
 
       <Card padding="lg" radius="md" withBorder bg="teal.0">
-        <Title order={4} mb="md">Example: Claude Code Integration</Title>
+        <Title order={4} mb="md">Complete Example: Claude Code Integration</Title>
         <Text size="sm" mb="sm">
-          With good APIs (Linear, Plane, Jira), you can build a simple aggregator for Claude Code:
+          Full example combining Linear + CiviCRM APIs to query all deadlines for Claude Code:
         </Text>
         <Code block style={{ fontSize: '10px', padding: '12px' }}>
-{`// Aggregate all deadlines for Claude Code
-async function getAllDeadlines() {
+{`// Complete example: Aggregate all deadlines (technical + grants) for Claude Code
+import { LinearClient } from '@linear/sdk';
+
+async function getAllDeadlines(daysAhead = 30) {
+  // Initialize clients
+  const linear = new LinearClient({ apiKey: process.env.LINEAR_API_KEY });
+  const endDate = new Date(Date.now() + daysAhead * 24 * 60 * 60 * 1000)
+    .toISOString().split('T')[0];
+
+  // Query both APIs in parallel
   const [technical, grants] = await Promise.all([
-    // Engineering tool API (Linear/Plane/Jira)
+    // Linear API - Technical deadlines
     linear.issues({
-      filter: { dueDate: { lte: addDays(new Date(), 30) } }
+      filter: {
+        dueDate: { lte: endDate },
+        state: { type: { nin: ['completed', 'canceled'] } }
+      },
+      orderBy: 'dueDate'
     }),
 
-    // CiviCRM API
+    // CiviCRM API - Grant deadlines
     fetch('https://policyengine.org/civicrm/ajax/api4/Grant/get', {
       method: 'POST',
+      headers: {
+        'X-Civi-Auth': 'Bearer ' + process.env.CIVICRM_API_KEY,
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({
-        where: [['application_received_date', '<=', addDays(new Date(), 30)]]
+        select: ['grant_type_id:label', 'amount_total', 'application_received_date', 'contact_id.display_name'],
+        where: [
+          ['application_received_date', '<=', endDate],
+          ['status_id:name', 'NOT IN', ['Awarded', 'Rejected']]
+        ],
+        orderBy: { application_received_date: 'ASC' }
       })
     }).then(r => r.json())
   ]);
 
-  return {
-    technical: technical.nodes,
-    grants: grants.values,
-    all: [...technical.nodes, ...grants.values].sort(byDate)
-  };
+  // Combine and format results
+  const allDeadlines = [
+    // Technical deadlines
+    ...technical.nodes.map(issue => ({
+      type: 'technical',
+      title: issue.title,
+      dueDate: issue.dueDate,
+      assignee: issue.assignee?.name,
+      team: issue.team.name,
+      priority: issue.priorityLabel,
+      url: issue.url
+    })),
+    // Grant deadlines
+    ...grants.values.map(grant => ({
+      type: 'grant',
+      title: \`\${grant['grant_type_id:label']} - $\${grant.amount_total?.toLocaleString()}\`,
+      dueDate: grant.application_received_date,
+      assignee: grant['contact_id.display_name'],
+      amount: grant.amount_total
+    }))
+  ].sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+  return allDeadlines;
 }
 
-// Result:
-// Oct 5: [Bug] Fix auth error (@Sarah)
-// Oct 6: [Grant] NSF POSE $1.5M (@Max)
-// Oct 7: [Feature] UK carbon tax (@Mike)
-// Oct 8: [Paper] AEA submission (@Max, @Nikhil)`}
+// Usage in Claude Code
+const deadlines = await getAllDeadlines(30);
+
+console.log('📅 Upcoming Deadlines (Next 30 Days):\\n');
+deadlines.forEach(d => {
+  const tag = d.type === 'grant' ? '💰' : d.priority === 'High' ? '🔴' : '📋';
+  console.log(\`\${tag} \${d.dueDate}: \${d.title} (@\${d.assignee})\`);
+});
+
+// Example output:
+// 📅 Upcoming Deadlines (Next 30 Days):
+//
+// 🔴 Oct 5: Fix authentication error (@Sarah)
+// 💰 Oct 6: Foundation Grant - $1,500,000 (@Max)
+// 📋 Oct 7: Add UK carbon tax analysis (@Mike)
+// 💰 Oct 15: NSF POSE Phase 2 - $250,000 (@Nikhil)
+
+// Total: ~40 lines for complete integration!
+// Compare to 100+ lines with GitHub Projects for just technical deadlines.`}
         </Code>
       </Card>
     </Stack>

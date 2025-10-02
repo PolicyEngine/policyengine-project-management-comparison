@@ -55,21 +55,35 @@ export const engineeringTools = [
     apiExample: {
       language: 'javascript',
       title: 'Query issues with upcoming deadlines',
-      code: `// REST API with date filtering
+      code: `// Plane REST API - Query issues due in next 7 days
+const today = new Date().toISOString().split('T')[0];
+const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  .toISOString().split('T')[0];
+
+const params = new URLSearchParams({
+  target_date__gte: today,
+  target_date__lte: nextWeek,
+  state__group__in: 'started,unstarted'
+});
+
 const response = await fetch(
-  'https://plane.policyengine.org/api/v1/workspaces/pe/projects/eng/issues/',
+  \`https://plane.policyengine.org/api/v1/workspaces/pe/projects/eng/issues/?\${params}\`,
   {
-    headers: { 'X-Api-Key': process.env.PLANE_API_KEY },
-    params: {
-      target_date__gte: '2025-10-02',
-      target_date__lte: '2025-10-09',
-      state__group__in: 'started,unstarted'
+    headers: {
+      'X-Api-Key': process.env.PLANE_API_KEY,
+      'Content-Type': 'application/json'
     }
   }
 );
 
 const issues = await response.json();
-// Returns only matching issues - server-filtered!`
+
+// Format for display
+issues.results.forEach(issue => {
+  console.log(\`\${issue.name} - Due: \${issue.target_date} - @\${issue.assignee?.display_name}\`);
+});
+
+// Server-filtered - only returns matching issues!`
     },
     deployment: 'docker-compose up (easiest) or Kubernetes',
     bestFor: ['OSS advocates with DevOps capacity', 'Want Linear UX at lower cost', 'Data sovereignty priority']
@@ -122,27 +136,49 @@ const issues = await response.json();
     ],
     apiExample: {
       language: 'javascript',
-      title: 'Query deadlines with GraphQL',
-      code: `import { LinearClient } from '@linear/sdk';
+      title: 'Query deadlines with GraphQL SDK',
+      code: `// Linear API - Official TypeScript SDK
+import { LinearClient } from '@linear/sdk';
 
-const linear = new LinearClient({ apiKey: process.env.LINEAR_API_KEY });
+const linear = new LinearClient({
+  apiKey: process.env.LINEAR_API_KEY
+});
 
-// Query upcoming deadlines - clean and simple
-const issues = await linear.issues({
+// Calculate date range
+const today = new Date().toISOString().split('T')[0];
+const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  .toISOString().split('T')[0];
+
+// Query upcoming deadlines - server-side filtering
+const result = await linear.issues({
   filter: {
     dueDate: {
-      gte: "2025-10-02",
-      lte: "2025-10-09"
+      gte: today,
+      lte: nextWeek
     },
-    state: { type: { nin: ["completed", "canceled"] } }
+    state: {
+      type: { nin: ["completed", "canceled"] }
+    }
   },
   orderBy: 'dueDate'
 });
 
 // Full TypeScript autocomplete and type safety
-issues.nodes.forEach(issue => {
-  console.log(\`\${issue.title} due \${issue.dueDate}\`);
-});`
+result.nodes.forEach(issue => {
+  console.log(\`[\${issue.priorityLabel}] \${issue.title}\`);
+  console.log(\`  Due: \${issue.dueDate}\`);
+  console.log(\`  Assignee: \${issue.assignee?.name || 'Unassigned'}\`);
+  console.log(\`  Team: \${issue.team.name}\`);
+  console.log(\`  URL: \${issue.url}\`);
+  console.log('');
+});
+
+// Example output:
+// [High] Fix authentication error
+//   Due: 2025-10-05
+//   Assignee: Sarah
+//   Team: API
+//   URL: https://linear.app/policyengine/issue/API-123`
     },
     bestFor: ['Teams valuing speed and UX', 'Cost not primary concern', 'Want best-in-class tools']
   },
@@ -194,22 +230,46 @@ issues.nodes.forEach(issue => {
     apiExample: {
       language: 'javascript',
       title: 'JQL deadline queries',
-      code: `const jiraClient = require('jira-client');
-const jira = new jiraClient({
+      code: `// Jira API - Using jira-client library
+const JiraClient = require('jira-client');
+
+const jira = new JiraClient({
   protocol: 'https',
   host: 'policyengine.atlassian.net',
   username: process.env.JIRA_EMAIL,
-  password: process.env.JIRA_API_TOKEN
+  password: process.env.JIRA_API_TOKEN,
+  apiVersion: '3',
+  strictSSL: true
 });
 
-// Query via JQL - powerful but requires learning JQL
-const issues = await jira.searchJira(
-  'duedate >= now() AND duedate <= endOfWeek() AND status != Done ORDER BY duedate ASC',
+// JQL Query - powerful but requires learning syntax
+// Query: Issues due in next 7 days, not done, ordered by due date
+const result = await jira.searchJira(
+  'duedate >= now() AND duedate <= 7d AND status not in (Done, Canceled) ORDER BY duedate ASC',
   {
-    fields: ['summary', 'duedate', 'assignee', 'priority'],
-    maxResults: 50
+    fields: ['summary', 'duedate', 'assignee', 'status', 'priority', 'issuetype'],
+    maxResults: 100
   }
-);`
+);
+
+// Format results
+result.issues.forEach(issue => {
+  console.log(\`[\${issue.fields.issuetype.name}] \${issue.fields.summary}\`);
+  console.log(\`  Due: \${issue.fields.duedate}\`);
+  console.log(\`  Assignee: \${issue.fields.assignee?.displayName || 'Unassigned'}\`);
+  console.log(\`  Priority: \${issue.fields.priority?.name}\`);
+  console.log(\`  Status: \${issue.fields.status.name}\`);
+  console.log(\`  URL: https://policyengine.atlassian.net/browse/\${issue.key}\`);
+  console.log('');
+});
+
+// Example output:
+// [Bug] Fix authentication error
+//   Due: 2025-10-05
+//   Assignee: Sarah Johnson
+//   Priority: High
+//   Status: In Progress
+//   URL: https://policyengine.atlassian.net/browse/PE-123`
     },
     ossApplication: 'https://www.atlassian.com/software/views/open-source-license-request',
     bestFor: ['If OSS license approved (free)', 'Complex workflows needed', 'Cost most important']
@@ -260,17 +320,48 @@ const issues = await jira.searchJira(
     ],
     apiExample: {
       language: 'javascript',
-      title: 'Complex API with no date filtering',
-      code: `// GitHub Projects v2 - Cannot filter by date!
-query {
-  organization(login: "PolicyEngine") {
-    projectV2(number: 1) {
-      items(first: 100) {  // Must fetch ALL
-        nodes {
-          fieldValues(first: 20) {
-            nodes {
-              ... on ProjectV2ItemFieldDateValue {
-                date  // Then filter client-side
+      title: 'Complex API requiring client-side filtering (YOUR CURRENT PROBLEM)',
+      code: `// GitHub Projects v2 API - THE PROBLEM
+// Cannot filter by date in query - must fetch ALL then filter client-side!
+
+import { graphql } from '@octokit/graphql';
+
+const graphqlWithAuth = graphql.defaults({
+  headers: { authorization: \`token \${process.env.GITHUB_TOKEN}\` }
+});
+
+// Step 1: Fetch ALL items (cannot filter by date in query)
+const result = await graphqlWithAuth(\`
+  query {
+    organization(login: "PolicyEngine") {
+      projectV2(number: 1) {
+        items(first: 100) {
+          nodes {
+            content {
+              ... on Issue {
+                title
+                number
+                repository { name }
+              }
+            }
+            fieldValues(first: 20) {
+              nodes {
+                ... on ProjectV2ItemFieldDateValue {
+                  date
+                  field {
+                    ... on ProjectV2FieldCommon {
+                      name
+                    }
+                  }
+                }
+                ... on ProjectV2ItemFieldSingleSelectValue {
+                  name
+                  field {
+                    ... on ProjectV2FieldCommon {
+                      name
+                    }
+                  }
+                }
               }
             }
           }
@@ -278,9 +369,34 @@ query {
       }
     }
   }
-}
+\`);
 
-// Requires 50+ lines of client-side date filtering`
+// Step 2: Extract and filter client-side (complex!)
+const today = new Date();
+const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+const upcomingDeadlines = result.organization.projectV2.items.nodes
+  .filter(item => {
+    // Find the "Due Date" field value
+    const dueDateField = item.fieldValues.nodes.find(
+      fv => fv.field?.name === 'Due Date'
+    );
+    if (!dueDateField?.date) return false;
+
+    // Parse and check date range
+    const dueDate = new Date(dueDateField.date);
+    return dueDate >= today && dueDate <= nextWeek;
+  })
+  .map(item => ({
+    title: item.content.title,
+    repo: item.content.repository.name,
+    number: item.content.number,
+    dueDate: item.fieldValues.nodes.find(fv => fv.field?.name === 'Due Date')?.date,
+    status: item.fieldValues.nodes.find(fv => fv.field?.name === 'Status')?.name
+  }))
+  .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+// 100+ lines total for what Linear does in 5!`
     },
     problem: 'This is your current pain point - why you\'re looking to migrate',
     bestFor: ['If API limitations acceptable', 'Want simplest solution', 'Budget critical']
@@ -331,26 +447,59 @@ query {
     apiExample: {
       language: 'javascript',
       title: 'GraphQL deadline queries',
-      code: `const mondayClient = require('monday-sdk-js')();
+      code: `// Monday.com API - GraphQL with server-side date filtering
+const mondaySdk = require('monday-sdk-js');
+const monday = mondaySdk();
 
+monday.setToken(process.env.MONDAY_API_TOKEN);
+
+// Calculate dates
+const today = new Date().toISOString().split('T')[0];
+const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  .toISOString().split('T')[0];
+
+// Query with date filtering (need to know board/column IDs)
 const query = \`query {
-  boards(ids: [\${boardId}]) {
-    items(query_params: {
-      rules: [{
-        column_id: "deadline",
-        compare_value: ["\${today}", "\${nextWeek}"],
-        operator: between
-      }]
-    }) {
+  boards(ids: [123456, 789012]) {
+    name
+    items(
+      limit: 100,
+      query_params: {
+        rules: [{
+          column_id: "deadline",
+          compare_value: ["\${today}", "\${nextWeek}"],
+          operator: between
+        }, {
+          column_id: "status",
+          compare_value: ["Done"],
+          operator: not_any_of
+        }]
+        order_by: [{ column_id: "deadline", direction: ASC }]
+      }
+    ) {
+      id
       name
-      column_values(ids: ["deadline", "person", "status"]) {
+      column_values(ids: ["deadline", "person", "status", "priority"]) {
+        id
         text
+        value
       }
     }
   }
 }\`;
 
-const response = await mondayClient.api(query);`
+const response = await monday.api(query);
+
+// Parse results
+response.data.boards.forEach(board => {
+  board.items.forEach(item => {
+    const deadline = item.column_values.find(cv => cv.id === 'deadline')?.text;
+    const assignee = item.column_values.find(cv => cv.id === 'person')?.text;
+    console.log(\`\${item.name} - Due: \${deadline} - @\${assignee}\`);
+  });
+});
+
+// Works, but need to know board/column IDs upfront`
     },
     question: 'Why did you stop using Monday.com before?',
     bestFor: ['Visual teams', 'Non-technical stakeholders important', 'If you liked it before']
@@ -397,20 +546,41 @@ const response = await mondayClient.api(query);`
     ],
     apiExample: {
       language: 'javascript',
-      title: 'REST API deadline queries',
-      code: `const stories = await fetch(
+      title: 'REST API deadline queries (FREE for 10 users!)',
+      code: `// Shortcut API - Search with deadline filtering
+const today = new Date().toISOString().split('T')[0];
+const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  .toISOString().split('T')[0];
+
+const response = await fetch(
   'https://api.app.shortcut.com/api/v3/search/stories',
   {
     method: 'POST',
     headers: {
-      'Shortcut-Token': process.env.SHORTCUT_TOKEN
+      'Shortcut-Token': process.env.SHORTCUT_TOKEN,
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      query: 'deadline:<=2025-10-09 !is:done',
+      query: \`deadline:>= \${today} deadline:<= \${nextWeek} !is:done\`,
       page_size: 25
     })
   }
-);`
+);
+
+const data = await response.json();
+
+// Format results
+data.data.forEach(story => {
+  console.log(\`[\${story.story_type}] \${story.name}\`);
+  console.log(\`  Due: \${story.deadline}\`);
+  console.log(\`  Owners: \${story.owner_ids.join(', ')}\`);
+  console.log(\`  State: \${story.workflow_state_id}\`);
+  console.log(\`  URL: \${story.app_url}\`);
+  console.log('');
+});
+
+// Server-side filtering works!
+// And it's FREE for 10 users!`
     },
     bestFor: ['Exactly 10 users (free!)', 'Want balance of features and speed'],
     hiddenGem: 'FREE for your team size (10 users)!'
@@ -456,15 +626,53 @@ const response = await mondayClient.api(query);`
     ],
     apiExample: {
       language: 'javascript',
-      title: 'Database queries',
-      code: `const tasks = await notion.databases.query({
-  database_id: bugsDbId,
+      title: 'Database queries with date filtering',
+      code: `// Notion API - Query database with date filter
+const { Client } = require('@notionhq/client');
+
+const notion = new Client({
+  auth: process.env.NOTION_TOKEN
+});
+
+// Query bugs database for upcoming deadlines
+const response = await notion.databases.query({
+  database_id: process.env.NOTION_BUGS_DB_ID,
   filter: {
-    property: 'Due Date',
-    date: { next_week: {} }
+    and: [
+      {
+        property: 'Due Date',
+        date: {
+          on_or_after: new Date().toISOString().split('T')[0],
+          on_or_before: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+            .toISOString().split('T')[0]
+        }
+      },
+      {
+        property: 'Status',
+        status: {
+          does_not_equal: 'Done'
+        }
+      }
+    ]
   },
-  sorts: [{ property: 'Due Date', direction: 'ascending' }]
-});`
+  sorts: [
+    {
+      property: 'Due Date',
+      direction: 'ascending'
+    }
+  ]
+});
+
+// Format results
+response.results.forEach(page => {
+  const title = page.properties.Title.title[0]?.plain_text || 'Untitled';
+  const dueDate = page.properties['Due Date'].date?.start;
+  const assignee = page.properties.Assignee.people[0]?.name || 'Unassigned';
+
+  console.log(\`\${title} - Due: \${dueDate} - @\${assignee}\`);
+});
+
+// Server-side filtering works, good for docs + tasks`
     },
     bestFor: ['Need docs + tasks together', 'Lighter engineering needs', 'Great for policy research']
   },
@@ -510,20 +718,43 @@ const response = await mondayClient.api(query);`
     ],
     apiExample: {
       language: 'javascript',
-      title: 'Limited date filtering',
-      code: `// Must fetch all then filter client-side
-const tasks = await client.tasks.findAll({
-  workspace: workspaceId,
+      title: 'Limited date filtering - requires client-side processing',
+      code: `// Asana API - Must filter dates client-side (like GitHub Projects)
+const asana = require('asana');
+
+const client = asana.Client.create().useAccessToken(
+  process.env.ASANA_TOKEN
+);
+
+// Step 1: Fetch ALL tasks (cannot filter by date in API)
+const result = await client.tasks.findAll({
+  workspace: process.env.ASANA_WORKSPACE_ID,
   completed_since: 'now',
-  opt_fields: 'name,due_on,assignee'
+  opt_fields: 'name,due_on,assignee,projects,memberships'
 });
 
-// Filter by date client-side - API doesn't support!
-const upcoming = tasks.data.filter(task => {
-  if (!task.due_on) return false;
-  const days = daysBetween(new Date(), new Date(task.due_on));
-  return days >= 0 && days <= 7;
-});`
+// Step 2: Filter by date CLIENT-SIDE (the problem!)
+const today = new Date();
+const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+const upcomingDeadlines = result.data
+  .filter(task => {
+    if (!task.due_on) return false;
+    const dueDate = new Date(task.due_on);
+    return dueDate >= today && dueDate <= nextWeek;
+  })
+  .sort((a, b) => new Date(a.due_on) - new Date(b.due_on));
+
+// Format results
+upcomingDeadlines.forEach(task => {
+  console.log(\`\${task.name}\`);
+  console.log(\`  Due: \${task.due_on}\`);
+  console.log(\`  Assignee: \${task.assignee?.name || 'Unassigned'}\`);
+  console.log('');
+});
+
+// Similar problem to GitHub Projects - no server-side date filtering
+// Results in 40-50 lines of code for simple query`
     },
     bestFor: ['Teams already comfortable with Asana', 'Lighter automation needs']
   }

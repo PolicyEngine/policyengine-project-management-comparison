@@ -51,22 +51,55 @@ export const crmOptions = [
     ],
     apiExample: {
       language: 'javascript',
-      title: 'Query grants with upcoming deadlines',
-      code: `const grants = await fetch(
+      title: 'Query grants with upcoming deadlines (REST API v4)',
+      code: `// CiviCRM REST API v4 - Query grants due in next 30 days
+const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+  .toISOString().split('T')[0];
+
+const response = await fetch(
   'https://policyengine.org/civicrm/ajax/api4/Grant/get',
   {
     method: 'POST',
-    headers: { 'X-Civi-Auth': 'Bearer ' + token },
+    headers: {
+      'X-Civi-Auth': 'Bearer ' + process.env.CIVICRM_API_KEY,
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify({
-      select: ['grant_type_id', 'amount_total', 'application_received_date'],
+      select: [
+        'id',
+        'grant_type_id:label',
+        'amount_total',
+        'amount_requested',
+        'application_received_date',
+        'status_id:label',
+        'contact_id.display_name'
+      ],
       where: [
-        ['application_received_date', '<=', addDays(new Date(), 30)],
+        ['application_received_date', '<=', endDate],
         ['status_id:name', 'NOT IN', ['Awarded', 'Rejected']]
       ],
-      orderBy: { application_received_date: 'ASC' }
+      orderBy: { application_received_date: 'ASC' },
+      limit: 50
     })
   }
-);`
+);
+
+const data = await response.json();
+
+// Format results
+data.values.forEach(grant => {
+  console.log(\`[\${grant['grant_type_id:label']}] \${grant['contact_id.display_name']}\`);
+  console.log(\`  Amount: $\${grant.amount_total?.toLocaleString()}\`);
+  console.log(\`  Deadline: \${grant.application_received_date}\`);
+  console.log(\`  Status: \${grant['status_id:label']}\`);
+  console.log('');
+});
+
+// Example output:
+// [Foundation Grant] PolicyEngine Foundation
+//   Amount: $1,500,000
+//   Deadline: 2025-10-15
+//   Status: Submitted`
     },
     bestFor: ['Nonprofits needing grant tracking', 'Open source advocates', 'Teams with PHP/DevOps capacity']
   },
