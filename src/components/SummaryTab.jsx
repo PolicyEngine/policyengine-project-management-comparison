@@ -150,7 +150,10 @@ export default function SummaryTab() {
             <Text size="xs">❌ Custom would cost: $50,000-90,000 to build</Text>
           </SimpleGrid>
           <Text size="sm" mt={8} fw={600}>
-            → Focus on choosing engineering tool only. See Implementation tab for details.
+            → Focus on choosing engineering tool. For CRM: Use CiviCRM backend (maybe with custom React frontend to avoid PHP).
+          </Text>
+          <Text size="xs" mt={4} c="blue">
+            💡 Smart option: CiviCRM backend (headless) + custom React frontend = Avoid PHP, get proven backend, build UI you want ($10k-20k vs $50k-90k full custom)
           </Text>
         </Alert>
       </div>

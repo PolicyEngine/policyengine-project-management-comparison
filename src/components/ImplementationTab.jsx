@@ -1,6 +1,7 @@
 import { Stack, Card, Title, Text, Badge, Timeline, Code, Alert, SimpleGrid, List, Divider, Table } from '@mantine/core';
-import { IconAlertCircle, IconCheck, IconDatabase, IconMail, IconUsers, IconRocket } from '@tabler/icons-react';
+import { IconAlertCircle, IconCheck, IconDatabase, IconMail, IconUsers, IconRocket, IconCode } from '@tabler/icons-react';
 import { decisiveFactors, userSyncImplementation, mailchimpMigration, implementationTimeline, finalVerdict } from '../data/implementation';
+import { hybridApproach, updatedOptions } from '../data/customFrontend';
 
 function DecisionCard() {
   return (
@@ -296,15 +297,211 @@ function FinalVerdictSection() {
   );
 }
 
+function HybridOption() {
+  return (
+    <Card padding="lg" radius="md" withBorder bg="blue.0">
+      <Stack gap="md">
+        <div>
+          <Badge color="blue" size="lg" mb="xs">💡 Smart Middle Ground</Badge>
+          <Title order={3}>{hybridApproach.title}</Title>
+          <Text size="sm" c="dimmed">{hybridApproach.tagline}</Text>
+        </div>
+
+        <SimpleGrid cols={3} spacing="md">
+          <div>
+            <Text size="xs" fw={700} mb={4}>Backend</Text>
+            <Text size="xs">{hybridApproach.concept.backend}</Text>
+          </div>
+          <div>
+            <Text size="xs" fw={700} mb={4}>Frontend</Text>
+            <Text size="xs">{hybridApproach.concept.frontend}</Text>
+          </div>
+          <div>
+            <Text size="xs" fw={700} mb={4}>Integration</Text>
+            <Text size="xs">{hybridApproach.concept.integration}</Text>
+          </div>
+        </SimpleGrid>
+
+        <Alert color="green" icon={<IconCheck />}>
+          <Text size="sm" fw={600}>{hybridApproach.concept.benefit}</Text>
+        </Alert>
+
+        <Table>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Approach</Table.Th>
+              <Table.Th>Dev Time</Table.Th>
+              <Table.Th>Year 1 Cost</Table.Th>
+              <Table.Th>PHP Required</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {updatedOptions.map((opt, idx) => (
+              <Table.Tr key={idx} style={{
+                backgroundColor: opt.highlight ? '#E6FFFA' : 'white'
+              }}>
+                <Table.Td>
+                  <Text size="sm" fw={600}>{opt.name}</Text>
+                  {opt.highlight && <Badge color="teal" size="xs" mt={4}>{opt.highlight}</Badge>}
+                </Table.Td>
+                <Table.Td><Text size="sm">{opt.devTime}</Text></Table.Td>
+                <Table.Td><Text size="sm">{opt.cost}</Text></Table.Td>
+                <Table.Td>
+                  <Badge color={opt.cons.some(c => c.includes('PHP')) ? 'red' : 'green'} variant="light" size="sm">
+                    {opt.cons.some(c => c.includes('PHP')) ? 'Yes' : 'No'}
+                  </Badge>
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+
+        <div>
+          <Text size="sm" fw={600} mb="xs">What You Get from CiviCRM Backend:</Text>
+          <SimpleGrid cols={2} spacing={4}>
+            {hybridApproach.whatYouGet.fromCiviCRM.slice(0, 8).map((item, idx) => (
+              <Text key={idx} size="xs" c="green">✅ {item}</Text>
+            ))}
+          </SimpleGrid>
+        </div>
+
+        <div>
+          <Text size="sm" fw={600} mb="xs">What You Build (React):</Text>
+          <SimpleGrid cols={2} spacing={4}>
+            {hybridApproach.whatYouGet.youBuild.slice(0, 6).map((item, idx) => (
+              <Text key={idx} size="xs" c="blue">🔨 {item}</Text>
+            ))}
+          </SimpleGrid>
+        </div>
+
+        <Code block style={{ fontSize: '10px', padding: '12px', maxHeight: '250px', overflow: 'auto' }}>
+          {hybridApproach.exampleComponent.code}
+        </Code>
+
+        <Text size="sm" style={{ fontStyle: 'italic' }}>
+          <strong>Recommendation:</strong> {hybridApproach.recommendation.verdict}
+        </Text>
+      </Stack>
+    </Card>
+  );
+}
+
 export default function ImplementationTab() {
   return (
     <Stack gap="xl">
       <div>
-        <Title order={2} mb="sm">Implementation: CiviCRM Setup Guide</Title>
+        <Title order={2} mb="sm">Implementation Options</Title>
         <Text c="dimmed" mb="md">
-          Complete implementation plan for CiviCRM including user database sync, Mailchimp migration, and grant tracking
+          Three approaches: CiviCRM as-is, CiviCRM backend + custom React frontend, or full custom CRM
         </Text>
       </div>
+
+      <HybridOption />
+
+      <Card padding="lg" radius="md" withBorder>
+        <Stack gap="md">
+          <Title order={3}>
+            <IconCode size={24} style={{ verticalAlign: 'middle', marginRight: 8 }} />
+            Building React Frontend for CiviCRM
+          </Title>
+          <Text c="dimmed">
+            If you choose the hybrid approach: CiviCRM backend (headless) + custom React frontend
+          </Text>
+
+          <Alert color="blue" icon={<IconAlertCircle />}>
+            <Text size="sm" fw={600} mb={4}>Development Estimate: 2-4 weeks</Text>
+            <Text size="sm">
+              Build ~1,450 lines of React code (5 main components). Use CiviCRM REST API v4 for all data operations.
+              No PHP required - pure React + TypeScript.
+            </Text>
+          </Alert>
+
+          <div>
+            <Text size="sm" fw={600} mb="xs">Core Components to Build:</Text>
+            <Table>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Component</Table.Th>
+                  <Table.Th>Purpose</Table.Th>
+                  <Table.Th>Complexity</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {hybridApproach.reactComponents.components.map((comp, idx) => (
+                  <Table.Tr key={idx}>
+                    <Table.Td>
+                      <Text size="sm" fw={600}>{comp.name}</Text>
+                      <Text size="xs" c="dimmed">{comp.lines}</Text>
+                    </Table.Td>
+                    <Table.Td><Text size="xs">{comp.purpose}</Text></Table.Td>
+                    <Table.Td>
+                      <List size="xs">
+                        {comp.features.map((f, fidx) => (
+                          <List.Item key={fidx}>{f}</List.Item>
+                        ))}
+                      </List>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+            <Text size="xs" c="dimmed" mt="xs">
+              Total: {hybridApproach.reactComponents.total}
+            </Text>
+          </div>
+
+          <div>
+            <Text size="sm" fw={600} mb="xs">CiviCRM API Client (TypeScript)</Text>
+            <Code block style={{ fontSize: '9px', padding: '8px', maxHeight: '300px', overflow: 'auto' }}>
+              {hybridApproach.implementation.week2.code.code}
+            </Code>
+          </div>
+
+          <div>
+            <Text size="sm" fw={600} mb="xs">Example: Grant Dashboard Component</Text>
+            <Code block style={{ fontSize: '9px', padding: '8px', maxHeight: '250px', overflow: 'auto' }}>
+              {hybridApproach.codeExamples.grantDashboard.code}
+            </Code>
+          </div>
+
+          <Divider />
+
+          <SimpleGrid cols={2} spacing="md">
+            <div>
+              <Text size="sm" fw={700} c="green" mb="xs">Pros of Hybrid</Text>
+              <List size="xs" spacing={2}>
+                {hybridApproach.pros.slice(0, 6).map((pro, idx) => (
+                  <List.Item key={idx} icon={<IconCheck size={12} color="green" />}>
+                    {pro}
+                  </List.Item>
+                ))}
+              </List>
+            </div>
+            <div>
+              <Text size="sm" fw={700} c="red" mb="xs">Cons of Hybrid</Text>
+              <List size="xs" spacing={2}>
+                {hybridApproach.cons.slice(0, 6).map((con, idx) => (
+                  <List.Item key={idx} icon={<IconAlertCircle size={12} />}>
+                    <Text size="xs">{con}</Text>
+                  </List.Item>
+                ))}
+              </List>
+            </div>
+          </SimpleGrid>
+
+          <Alert color="teal" icon={<IconCheck />}>
+            <Text size="sm" fw={600}>Decision Guide:</Text>
+            <Text size="sm" mt={4}>
+              <strong>Choose Hybrid if:</strong> You want to avoid PHP, want PolicyEngine-styled UI,
+              have 2-4 weeks React dev capacity, and custom UX is worth $10k-20k.
+            </Text>
+            <Text size="sm" mt={8}>
+              <strong>Choose CiviCRM as-is if:</strong> Budget tight, want fastest path, fine with default UI,
+              minimal dev time available.
+            </Text>
+          </Alert>
+        </Stack>
+      </Card>
 
       <DecisionCard />
 
