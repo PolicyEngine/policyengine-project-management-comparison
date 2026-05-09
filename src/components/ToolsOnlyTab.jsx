@@ -1,3 +1,5 @@
+'use client';
+
 import { Stack, Card, Title, Text, Badge, Table, Code, Alert, SimpleGrid, Group } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { engineeringTools } from '../data/engineeringTools';

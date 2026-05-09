@@ -1,13 +1,14 @@
-import '@mantine/core/styles.css';
+'use client';
+
 import { useState } from 'react';
 import { MantineProvider, Container, Tabs } from '@mantine/core';
 import { IconLayoutDashboard, IconCode, IconServer, IconDatabase, IconRocket } from '@tabler/icons-react';
-import Header from './components/Header';
-import SummaryTab from './components/SummaryTab';
-import ToolsOnlyTab from './components/ToolsOnlyTab';
-import CRMTab from './components/CRMTab';
-import APITab from './components/APITab';
-import ImplementationTab from './components/ImplementationTab';
+import Header from '@/components/Header';
+import SummaryTab from '@/components/SummaryTab';
+import ToolsOnlyTab from '@/components/ToolsOnlyTab';
+import CRMTab from '@/components/CRMTab';
+import APITab from '@/components/APITab';
+import ImplementationTab from '@/components/ImplementationTab';
 
 const theme = {
   colors: {
