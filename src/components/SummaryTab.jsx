@@ -1,3 +1,5 @@
+'use client';
+
 import { Stack, Card, Title, Text, Badge, Group, List, Table, Divider, Alert, SimpleGrid, ThemeIcon } from '@mantine/core';
 import { IconTrophy, IconAlertCircle, IconCheck, IconX, IconStar } from '@tabler/icons-react';
 import { combinations, costComparison } from '../data/combinations';

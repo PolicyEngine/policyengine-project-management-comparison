@@ -1,3 +1,5 @@
+'use client';
+
 import { Stack, Card, Title, Text, Badge, Timeline, Code, Alert, SimpleGrid, List, Divider, Table } from '@mantine/core';
 import { IconAlertCircle, IconCheck, IconDatabase, IconMail, IconUsers, IconRocket, IconCode } from '@tabler/icons-react';
 import { decisiveFactors, userSyncImplementation, mailchimpMigration, implementationTimeline, finalVerdict } from '../data/implementation';
